@@ -5,6 +5,8 @@ const User = require("../../models/User");
 const jwt = require("jsonwebtoken");
 const keys = require("../../config/keys");
 const passport = require("passport");
+const validateRegisterInput = require("../../validation/register");
+const validateLoginInput = require("../../validation/login");
 
 router.get("/test", (req, res) => res.json({ msg: "This is the users11 route" }));
 
@@ -15,13 +17,13 @@ router.post("/register", (req, res) => {
     return res.status(400).json(errors);
   }
 
-  User.findOne({ name: req.body.name }).then(user => {
+  User.findOne({ handle: req.body.handle }).then(user => {
     if (user) {
-      errors.name = "User already exists";
+      errors.handle = "User already exists with this handle";
       return res.status(400).json(errors);
     } else {
       const newUser = new User({
-        name: req.body.name,
+        handle: req.body.handle,
         email: req.body.email,
         password: req.body.password
       });
@@ -33,7 +35,7 @@ router.post("/register", (req, res) => {
           newUser
             .save()
             .then(user => {
-              const payload = { id: user.id, name: user.name };
+              const payload = { id: user.id, handle: user.handle };
 
               jwt.sign(
                 payload,
@@ -55,81 +57,26 @@ router.post("/register", (req, res) => {
 });
 
 
+router.post("/login", (req, res) => {
+  const { errors, isValid } = validateLoginInput(req.body);
 
-router.post('/login', (req, res) => {
+  if (!isValid) {
+    return res.status(400).json(errors);
+  }
+
   const email = req.body.email;
   const password = req.body.password;
 
-  User.findOne({ email })
-    .then(user => {
-      if (!user) {
-        return res.status(404).json({ email: 'This user does not exist' });
-      }
-
-      bcrypt.compare(password, user.password)
-        .then(isMatch => {
-          if (isMatch) {
-            res.json({ msg: 'Success' });
-          } else {
-            return res.status(400).json({ password: 'Incorrect password' });
-          }
-        })
-    })
-})
-
-router.post("/login", (req, res) => {
-  const { errors, isValid } = validateLoginInput(req.body);
-
-  if (!isValid) {
-    return res.status(400).json(errors);
-  }
-
-  const name = req.body.name;
-  const password = req.body.password;
-
-  User.findOne({ name }).then(user => {
+  User.findOne({ email }).then(user => {
     if (!user) {
-      errors.name = "This user does not exist";
-      return res.status(400).json(errors);
+      // errors.email = "This user does not exist";
+      // return res.status(400).json(errors);
+      return res.status(404).json({ email: 'This user does not exist' });
     }
 
     bcrypt.compare(password, user.password).then(isMatch => {
       if (isMatch) {
-        const payload = { id: user.id, name: user.name };
-
-        jwt.sign(payload, keys.secretOrKeys, { expiresIn: 3600 }, (err, token) => {
-          res.json({
-            success: true,
-            token: "Bearer " + token
-          });
-        });
-      } else {
-        errors.password = "Incorrect password";
-        return res.status(400).json(errors);
-      }
-    });
-  });
-});
-
-router.post("/login", (req, res) => {
-  const { errors, isValid } = validateLoginInput(req.body);
-
-  if (!isValid) {
-    return res.status(400).json(errors);
-  }
-
-  const name = req.body.name;
-  const password = req.body.password;
-
-  User.findOne({ name }).then(user => {
-    if (!user) {
-      errors.name = "This user does not exist";
-      return res.status(400).json(errors);
-    }
-
-    bcrypt.compare(password, user.password).then(isMatch => {
-      if (isMatch) {
-        const payload = { id: user.id, name: user.name };
+        const payload = { id: user.id, handle: user.handle };
 
         jwt.sign( payload, keys.secretOrKeys, { expiresIn: 3600 }, (err, token) => {
             res.json({
@@ -139,13 +86,13 @@ router.post("/login", (req, res) => {
           }
         );
       } else {
-        errors.password = "Incorrect password";
-        return res.status(400).json(errors);
+        // errors.password = "Incorrect password";
+        // return res.status(400).json(errors);
+        return res.status(400).json({ password: 'Incorrect password' });
       }
     });
   });
 });
-
 
 // router.get('/current', passport.authenticate('jwt', { session: false }), (req, res) => {
 //   res.json({ msg: 'Success' });

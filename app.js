@@ -8,8 +8,6 @@ const bodyParser = require("body-parser");
 const passport = require("passport");
 require("./config/passport")(passport);
 
-// const User = require('./models/User');
-
 mongoose
   .connect(
     db,
@@ -24,12 +22,6 @@ mongoose
 app.use(passport.initialize());
 
 app.get("/", (req, res) => {
-  // const user = new User({
-  //   handle: 'jim',
-  //   email: "jim@jim.jim",
-  //   password: 'jimisgreat123'
-  // // })
-  // user.save()
   res.send("Hello Safuh")
 });
 
