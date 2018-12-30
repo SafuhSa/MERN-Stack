@@ -20,11 +20,7 @@ const App = () => (
 
       <ProtectedRoute exact path="/tweets" component={TweetsContainer} />
       <ProtectedRoute exact path="/profile" component={ProfileContainer} />
-      <ProtectedRoute
-        exact
-        path="/new_tweet"
-        component={TweetComposeContainer}
-      />
+      <ProtectedRoute exact path="/new_tweet" component={TweetComposeContainer} />
     </Switch>
   </div>
 );
