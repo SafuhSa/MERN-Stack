@@ -42,7 +42,7 @@ class LoginForm extends React.Component {
       password: this.state.password
     };
 
-    this.props.login(user).then(this.props.history.push("/profile"));
+    this.props.login(user).then(this.props.history.push("/signup"));
   }
 
   // Render the session errors if there are any
